@@ -2,9 +2,7 @@
 
 namespace App\Console\Commands;
 
-use App\Exceptions\UndefinedException;
-use App\Models\Responses\Message;
-use ErrorException;
+use App\Models\Responses\Response;
 use Exception;
 use Illuminate\Console\Command;
 
@@ -29,10 +27,10 @@ class testing extends Command
      */
     public function handle()
     {
-        $messages = new Message();
+        $messages = new Response();
 
         try {
-//            $char = 'c';
+            $char = 'c';
             $test = [
                 'number' => 1,
                 'string' => 'test',
@@ -40,7 +38,7 @@ class testing extends Command
                 'gettype_char' => gettype($char),
             ];
 
-            echo $messages->getSuccess(['check' => $char]);
+            echo $messages->getSuccess(['check' => $test]);
         } catch (Exception $exception) {
 
             echo $messages->getExceptionError($exception);

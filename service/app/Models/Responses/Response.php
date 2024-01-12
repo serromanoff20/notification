@@ -4,9 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models\Responses;
 
-use App\Exceptions\UndefinedException;
 use Exception;
-//use JsonException;
 
 /**
  * Class Response
