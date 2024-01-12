@@ -1,5 +1,5 @@
 #Install image php
-FROM bitnami/php-fpm:8.1.3
+FROM bitnami/php-fpm:8.3.1
 
 # Updates packages list for the image
 RUN apt-get update
