@@ -1,0 +1,55 @@
+services: 
+  
+  php813:
+    build: ./docker/php
+    user: 0:0
+    container_name: notify_php813
+    restart: always
+    tty: true
+    networks:
+      - notify
+    volumes:
+      - ./:/data/notify # корень проекта
+      - ./docker/php/custom.ini:/opt/bitnami/php/etc/conf.d/custom.ini # php конфиг
+  #      - /data2/service-ipu:/data2/service-ipu # раскомментировать на сервере # отдельный путь для файлов
+
+  nginx:
+    container_name: notify_nginx
+    image: 'bitnami/nginx:latest'
+    user: 0:0
+    restart: always
+    tty: true
+    networks:
+      - notify
+    ports:
+      - 8111:8111
+    volumes:
+      - ./:/data/notify # корень проекта
+      - ./docker/nginx/nginx.conf:/opt/bitnami/nginx/conf/nginx.conf # nginx конфиг
+#      - /var/log/containers/nginx:/opt/bitnami/nginx/logs # раскомментировать на сервере # nginx логи
+    depends_on:
+      - php813
+
+#in OS Windows not working++
+#  cron:
+#    build: ./docker/cron
+#    user: 0:0
+#    container_name: service-ipu_cron
+#    restart: always
+#    tty: true
+#    networks:
+#      - sipu
+#    volumes:
+#      - /var/run/docker.sock:/var/run/docker.sock # не знаю зачем он нужен, но он нужен ОБЯЗЯТЕЛЬНО в противном случае ничего не работает
+#      - ./docker/cron/docker-entrypoint.sh:/docker-entrypoint.sh
+#      - type: bind
+#        source: ./docker/cron/crontab
+#        target: /etc/cron.d/crontab
+#    depends_on:
+#      - php813
+#in OS Windows not working--
+
+
+networks:
+  notify:
+    driver: bridge
