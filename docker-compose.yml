@@ -22,7 +22,7 @@ services:
     networks:
       - notify
     ports:
-      - 8111:8111
+      - 8112:8112
     volumes:
       - ./:/data/notify # корень проекта
       - ./docker/nginx/nginx.conf:/opt/bitnami/nginx/conf/nginx.conf # nginx конфиг
