@@ -2,37 +2,39 @@
 
 declare(strict_types=1);
 
-namespace App\Models\Messages;
+namespace App\Models\Responses;
 
+use App\Exceptions\UndefinedException;
 use Exception;
 //use JsonException;
 
 /**
- * Class Messages
+ * Class Response
  *
  * Класс, отвечающий за систему сообщений в методах контроллеров
  * @package App\Models\Core
  * @author Сергей Романов
  * @copyright Copyright (c) ООО "ТехноКорп"
- * @property string $text
- * @property string $type
+ * @property DataResult $response
+ * @property int $code
+// * @property string $type
  */
 
-class Message
+class Response
 {
     /**
-     * Текст сообщения
+     * Ответ, который включает в себя необходимый набор свойств
      *
      * @var DataResult
      */
-    public DataResult $data;
+    public DataResult $response;
 
-    /**
-     * Тип сообщения
-     *
-     * @var string
-     */
-    public string $type;
+//    /**
+//     * Тип сообщения
+//     *
+//     * @var string
+//     */
+//    public string $type;
 
     /**
      * HTTP-код вывода страницы
@@ -42,20 +44,19 @@ class Message
     public int $code;
 
     /**
-     * Тип сообщения - "ошибка"
+     * Тип ответа - "ошибка"
      */
     private const ERROR_TYPE = "error";
 
-
     /**
-     * Тип сообщения - "исключение".
+     * Тип ответа - "исключение"
      * Исключения, как могут содержать результирующий набор данных(с предупреждением),
      * так и могут содержать информацию об ошибке
      */
     private const EXCEPTION_TYPE = "exception";
 
     /**
-     * Тип сообщения - "успешно"
+     * Тип ответа - "успешно"
      */
     private const SUCCESS_TYPE = "success";
 
@@ -69,9 +70,10 @@ class Message
     public function getSuccess(mixed $data, int $code = 200): string
     {
         try {
-            $this->data->defineResult($data);
+            $this->response = new DataResult((array)$data, self::SUCCESS_TYPE);
+
             $this->code = $code;
-            $this->type = self::SUCCESS_TYPE;
+//            $this->type = self::SUCCESS_TYPE;
 
 //пока не понятно как это работает++
 //            if (!$is_json) {
@@ -123,7 +125,6 @@ class Message
 
     /**
      * Сообщение об ошибке
-     *
      * @param array $error
      * @param int $code
      *
@@ -133,31 +134,27 @@ class Message
     {
         $key_error = array_key_first($error);
         if (gettype($key_error) === 'string') {
-            $this->data["message"] = $error[$key_error][0] . " - " . $key_error;
+            $this->response->message = $error[$key_error][0] . " - " . $key_error;
         } else {
-            $this->data["message"] = $error;
+            $this->response->data = $error;
         }
         $this->code = $code;
-        $this->type = self::ERROR_TYPE;
+//        $this->type = self::ERROR_TYPE;
     }
 
     /**
      * Обработка исключений(Exception)
-     *
      * @param Exception $exception
      * @param int $code
+     *
      * @return string
      */
     public function getExceptionError(Exception $exception, int $code = 500): string
     {
+        $this->response = new DataResult($exception->getTrace(), $exception->getMessage(), true);
 
-
-//        $this->data = [
-//            'is_exception' => true,
-//            'message' => $e->getMessage(),
-//        ];
         $this->code = $code;
-        $this->type = self::EXCEPTION_TYPE;
+//        $this->type = self::EXCEPTION_TYPE;
 
         return json_encode($this, JSON_UNESCAPED_UNICODE);
     }

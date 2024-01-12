@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\ContractController;
+use App\Http\Controllers\TestController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\MainController;
 use App\Http\Controllers\CountersController;
@@ -33,18 +34,6 @@ Route::get('/my', function () {
 Route::get('test/info', function () {
     return phpinfo();
 });
+
+Route::get('test', [TestController::class, 'test'])->name('test.test');
 //testing--
-
-//Output OrgController`a++
-Route::get('/org/list', [OrgController::class, 'list'])->name('org.list');
-
-//Output OrgController`a--
-//Output ContractController`a++
-Route::get('/contract/list', [ContractController::class, 'list'])->name('org.list');
-
-//Output ContractController`a--
-
-Route::get('/counter/list', [CountersController::class, 'list']);
-Route::get('/counter/counter', [CountersController::class, 'add']);
-
-Route::get('test/count-accounts', [MainController::class, 'test']);

@@ -7,11 +7,11 @@ services:
     restart: always
     tty: true
     networks:
-      - notify
+      - network
     volumes:
       - ./:/data/notify # корень проекта
       - ./docker/php/custom.ini:/opt/bitnami/php/etc/conf.d/custom.ini # php конфиг
-  #      - /data2/service-ipu:/data2/service-ipu # раскомментировать на сервере # отдельный путь для файлов
+#      - /data2/service-ipu:/data2/service-ipu # раскомментировать на сервере # отдельный путь для файлов
 
   nginx:
     container_name: notify_nginx
@@ -20,7 +20,7 @@ services:
     restart: always
     tty: true
     networks:
-      - notify
+      - network
     ports:
       - 8112:8112
     volumes:
@@ -49,7 +49,6 @@ services:
 #      - php813
 #in OS Windows not working--
 
-
 networks:
-  notify:
+  network:
     driver: bridge

@@ -2,28 +2,27 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Responses\Message;
+use App\Models\Responses\Response;
 use Exception;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Foundation\Validation\ValidatesRequests;
-use Illuminate\Http\Response;
 
-class MainController extends Controller
+class TestController extends Controller
 {
     use AuthorizesRequests;
     use ValidatesRequests;
 
     /**
-     * Endpoint testing
+     * Endpoint for tests
      *
-     * @return Response
+     * @return string
      */
     public function test(): string
     {
-        $messages = new Message();
+        $messages = new Response();
 
         try{
-            $char = 'c';
+            $char = '/';
             $test = [
                 'number' => 1,
                 'string' => 'test',
