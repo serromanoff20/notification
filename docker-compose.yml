@@ -1,7 +1,7 @@
 services: 
   
   php83:
-    build: ./docker/php
+    build: environment/docker/php
     user: 0:0
     container_name: notification_php83
     restart: always

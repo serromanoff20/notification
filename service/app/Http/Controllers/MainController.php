@@ -2,11 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Responses\Message;
+use App\Models\Responses\Response;
 use Exception;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Foundation\Validation\ValidatesRequests;
-use Illuminate\Http\Response;
+//use Illuminate\Http\Response;
 
 class MainController extends Controller
 {
@@ -20,7 +20,7 @@ class MainController extends Controller
      */
     public function test(): string
     {
-        $messages = new Message();
+        $resModel = new Response();
 
         try{
             $char = 'c';
@@ -31,9 +31,9 @@ class MainController extends Controller
                 'gettype_char' => gettype($char),
             ];
 
-            return $messages->getSuccess(['check' => $test]);
+            return $resModel->getSuccess(['check' => $test]);
         }catch (Exception $exception) {
-            return $messages->getExceptionError($exception);
+            return $resModel->getExceptionError($exception);
         }
 
     }
