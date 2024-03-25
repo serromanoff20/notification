@@ -8,7 +8,7 @@ trait MigrationTableSchemaTrait
      * @param string $nameTable
      * @return string
      */
-    public function setSchemeName(string $nameTable): string
+    public function setScheme(string $nameTable): string
     {
         return env('DB_SCHEMA') . "." . $nameTable;
     }

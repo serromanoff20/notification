@@ -4,7 +4,12 @@ declare(strict_types=1);
 
 namespace App\Models\Responses;
 
+use App\Consts;
+use App\Exceptions\ExceptionHandler;
+use App\Models\ModelApp;
+use App\Models\Responses\DataResult;
 use Exception;
+use Illuminate\Support\Collection;
 
 /**
  * Class Response
@@ -13,146 +18,116 @@ use Exception;
  * @package App\Models\Core
  * @author Сергей Романов
  * @copyright Copyright (c) ООО "ТехноКорп"
- * @property DataResult $response
+ * @property array $response
  * @property int $code
-// * @property string $type
  */
 
 class Response
 {
     /**
-     * Ответ, который включает в себя необходимый набор свойств
+     * Resulting set data from model
      *
-     * @var DataResult
+//     * @var DataResult
+     * @var array
      */
-    public DataResult $response;
+    public DataResult $result;
+//    public array $response;
 
-//    /**
-//     * Тип сообщения
-//     *
-//     * @var string
-//     */
-//    public string $type;
+    public string $typeResponse;
 
     /**
-     * HTTP-код вывода страницы
+     * inner HTTP-code of application
      *
      * @var int
      */
     public int $code;
 
     /**
-     * Тип ответа - "ошибка"
-     */
-    private const ERROR_TYPE = "error";
-
-    /**
-     * Тип ответа - "исключение"
-     * Исключения, как могут содержать результирующий набор данных(с предупреждением),
-     * так и могут содержать информацию об ошибке
-     */
-    private const EXCEPTION_TYPE = "exception";
-
-    /**
-     * Тип ответа - "успешно"
-     */
-    private const SUCCESS_TYPE = "success";
-
-    /**
-     * Сообщение об успешном выполнении
-     *
+     * Processing a successful data set
      * @param mixed $data
-     * @param int $code
      * @return string
      */
-    public function getSuccess(mixed $data, int $code = 200): string
+    public function getSuccess(mixed $data): string
     {
+        header('Content-type: application/json');
+
         try {
-            $this->response = new DataResult((array)$data, self::SUCCESS_TYPE);
-
-            $this->code = $code;
-//            $this->type = self::SUCCESS_TYPE;
-
-//пока не понятно как это работает++
-//            if (!$is_json) {
-//                return json_encode($this, JSON_THROW_ON_ERROR);
-//            }
-//пока не понятно как это работает--
+            if ($data instanceof Collection) {
+                $this->response = new DataResult($data->all());
+            } else if (gettype($data) === 'array') {
+                $this->response = new DataResult($data);
+            } else {
+                $this->response = new DataResult((array)$data);
+            }
+            $this->code = Consts::SUCCESS_CODE;
 
             return json_encode($this, JSON_UNESCAPED_UNICODE);
         } catch (Exception $exception){
+            $this->code = Consts::WARNING_CODE;
 
-            return $this->getExceptionError($exception, 203);
+            return $this->getExceptionError($exception);
         }
     }
 
     /**
      * Получение массива сообщений об ошибках из ошибок модели
-     *
-     * @param array $errors
-     * @param int $code
+     * @param mixed $data
+     * @param array $messages
      * @return string
      */
-    public function getModelErrors(array $errors, int $code = 500): string
+    public function getModelErrors(mixed $data, array $messages=[]): string
     {
+        header('Content-type: application/json');
+
         try {
-            $arrOut = [];
+            $this->code = !isset($this->code) ? Consts::ERROR_CODE : $this->code;
 
-            if (count($errors) === 0) {
-                return json_encode([], JSON_UNESCAPED_UNICODE);
-            }
-
-            foreach ($errors as $error_arr) {
-                $error_arr = (gettype($error_arr) === 'array') ? $error_arr : array($error_arr);
-
-                $arrOut = array_merge($arrOut, $error_arr);
-                $this->getError($arrOut, $code);
-            }
+            $this->getError($data, $messages);
 
             $is_json = json_encode($this, JSON_UNESCAPED_UNICODE);
 
             if (!$is_json) {
                 return json_encode($this, JSON_THROW_ON_ERROR);
             }
-
             return $is_json;
         } catch (Exception $exception) {
-            return $this->getExceptionError($exception, $code);
+            return $this->getExceptionError($exception);
         }
     }
 
     /**
      * Сообщение об ошибке
-     * @param array $error
-     * @param int $code
-     *
+     * @param mixed $data
+     * @param array $messages
      * @return void
      */
-    protected function getError(array $error, int $code): void
+    private function getError(mixed $data, array $messages=[]): void
     {
-        $key_error = array_key_first($error);
-        if (gettype($key_error) === 'string') {
-            $this->response->message = $error[$key_error][0] . " - " . $key_error;
-        } else {
-            $this->response->data = $error;
+        if (empty($messages)) {
+            $message = new ModelApp();
+            $message->setError(Consts::ERROR_TYPE, "Ошибка запроса");
+            $messages = $message->getErrors();
         }
-        $this->code = $code;
-//        $this->type = self::ERROR_TYPE;
+        $this->response = new DataResult([$data], $messages);
     }
+
 
     /**
      * Обработка исключений(Exception)
      * @param Exception $exception
      * @param int $code
-     *
      * @return string
      */
-    public function getExceptionError(Exception $exception, int $code = 500): string
+    public function getExceptionError(Exception $exception, int $code = 0): string
     {
-        $this->response = new DataResult($exception->getTrace(), $exception->getMessage(), true);
+        header('Content-type: application/json');
 
-        $this->code = $code;
-//        $this->type = self::EXCEPTION_TYPE;
+        $messages = new ModelApp();
+
+        $messages->setError(Consts::EXCEPTION_TYPE, $exception->getMessage());
+
+        $this->response = new DataResult($exception->getTrace(), $messages->getErrors());
+        $this->code = ($code === 0) ? Consts::EXCEPTION_CODE : $code;
 
         return json_encode($this, JSON_UNESCAPED_UNICODE);
     }

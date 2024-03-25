@@ -1,12 +1,7 @@
 <?php
 
-use App\Http\Controllers\ContractController;
-use App\Http\Controllers\TestController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\MainController;
-use App\Http\Controllers\CountersController;
-use App\Http\Controllers\OrgController;
-
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -19,21 +14,9 @@ use App\Http\Controllers\OrgController;
 */
 
 //testing++
-Route::get('/', function () {
-    return 'HI, BOY!';
-});
-
-Route::get('/welcome', function () {
-    return view('welcome');
-});
-
-Route::get('/my', function () {
-    return view('my');
-});
-
-Route::get('test/info', function () {
-    return phpinfo();
-});
-
-Route::get('test', [TestController::class, 'test'])->name('test.test');
+Route::get('/main/test', [MainController::class, 'test'])->name('main.test');
+Route::post('/main/check', [MainController::class, 'check'])->name('main.check');
 //testing--
+
+Route::get('/main/call-expo-push', [MainController::class, 'callExpoPush'])->name('main.callExpoPush');
+Route::get('/main/call-firebase-push', [MainController::class, 'callFirebasePush'])->name('main.callFirebasePush');

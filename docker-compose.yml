@@ -10,7 +10,7 @@ services:
       - network
     volumes:
       - ./:/data/notification # корень проекта
-      - ./docker/php/custom.ini:/opt/bitnami/php/etc/conf.d/custom.ini # php конфиг
+      - ./environment/docker/php/custom.ini:/opt/bitnami/php/etc/conf.d/custom.ini # php конфиг
 #      - /data2/service-ipu:/data2/service-ipu # раскомментировать на сервере # отдельный путь для файлов
 
   nginx:
@@ -25,7 +25,7 @@ services:
       - 8112:8112
     volumes:
       - ./:/data/notification # корень проекта
-      - ./docker/nginx/nginx.conf:/opt/bitnami/nginx/conf/nginx.conf # nginx конфиг
+      - ./environment/docker/nginx/nginx.conf:/opt/bitnami/nginx/conf/nginx.conf # nginx конфиг
 #      - /var/log/containers/nginx:/opt/bitnami/nginx/logs # раскомментировать на сервере # nginx логи
     depends_on:
       - php83

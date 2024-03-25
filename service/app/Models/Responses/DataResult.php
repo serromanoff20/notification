@@ -1,37 +1,48 @@
-<?php
+<?php namespace App\Models\Responses;
 
-namespace App\Models\Responses;
+use App\Consts;
+use App\Exceptions\ErrorHandler;
 
 /**
  * Class DataResult
  *
- * Объект, который содержит результирующий набор данных
+ * Resulting set data which may self-include success response, ErrorHandler and ExceptionHandler
  * @package App\Models\Core
  * @author Сергей Романов
  * @copyright Copyright (c) ООО "ТехноКорп"
-
- * @property bool $isException
- * @property array $data
  * @property string $message
+ * @property array $data
  */
 class DataResult
 {
-    public bool $isException = false;
+    /**
+     * Model that is initialized in the controller and
+     * returned as the final result when an action is called
+     *
+     * @var array
+     */
+    public array $model;
 
-    public array $data;
-
-    public string $message;
+    /**
+     * List messages about errors that may called in model
+     *
+     * @var array
+     */
+    public array $messages;
 
     /**
      * DataResult constructor.
-     * @param bool $isExc
-     * @param array $data
-     * @param string $message
+     * @param array $model
+     * @param array $messages
      */
-    public function __construct(array $data, string $message, bool $isExc=false)
+    public function __construct(array $model, array $messages=[])
     {
-        $this->isException = $isExc;
-        $this->data = $data;
-        $this->message = $message;
+        $this->model = $model;
+
+        if (empty($messages)){
+            $this->messages[0] = new ErrorHandler("", Consts::SUCCESS_TYPE);
+        } else {
+            $this->messages = $messages;
+        }
     }
 }
