@@ -2,12 +2,14 @@
 
 use App\Consts;
 use App\Models\LogRequest;
-use App\Models\Push\ExpoAPI;
-use App\Models\Push\FirebaseAPI;
+use App\Models\Notifications\Notification;
+use App\Models\Notifications\Push\ExpoAPI;
+use App\Models\Notifications\Push\FirebaseAPI;
 use App\Models\Responses\Response;
 use Exception;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Foundation\Validation\ValidatesRequests;
+//use App\Types;
 
 class MainController extends Controller
 {
@@ -15,45 +17,11 @@ class MainController extends Controller
     use ValidatesRequests;
 
     /**
-     * Endpoint check get-request
-     * @param LogRequest $request
-     * @return string
-     */
-    public function test(LogRequest $request): string
-    {
-        $response = new Response();
-
-        try {
-
-            return $response->getSuccess($request->getBodyParams());
-        } catch (Exception $exception) {
-            return $response->getExceptionError($exception);
-        }
-    }
-
-    /**
-     * Endpoint check post-request
-     * @param LogRequest $request
-     * @return string
-     */
-    public function check(LogRequest $request): string
-    {
-        $response = new Response();
-
-        try {
-
-            return $response->getSuccess($request->getQueryParams());
-        } catch (Exception $exception) {
-            return $response->getExceptionError($exception);
-        }
-    }
-
-    /**
      * Endpoint check push-notification throw expo-api
      * @param LogRequest $request
      * @return string
      */
-    public function callExpoPush(LogRequest $request): string
+    public function callMobilePush(LogRequest $request): string
     {
         $response = new Response();
 
@@ -65,13 +33,13 @@ class MainController extends Controller
             if ($model->hasErrors()) {
                 $response->code = Consts::ERROR_CLIENT_CODE;
 
-                return $response->getModelErrors($model->getEmptyModel(), $model->getErrors());
+                return $response->getModelErrors($model->getBodyModel(), $model->getErrors());
             }
 
             $content = $model->callPush();
 
             if ($model->hasErrors() || empty($content)) {
-                return $response->getModelErrors($model->getEmptyModel(), $model->getErrors());
+                return $response->getModelErrors($model->getBodyModel(), $model->getErrors());
             }
 
             return $response->getSuccess($content);
@@ -85,7 +53,7 @@ class MainController extends Controller
      * @param LogRequest $request
      * @return string
      */
-    public function callFirebasePush(LogRequest $request): string
+    public function callWebPush(LogRequest $request): string
     {
         $response = new Response();
 
@@ -97,17 +65,43 @@ class MainController extends Controller
             if ($model->hasErrors()) {
                 $response->code = Consts::ERROR_CLIENT_CODE;
 
-                return $response->getModelErrors($model->getEmptyModel(), $model->getErrors());
+                return $response->getModelErrors($model->getBodyModel(), $model->getErrors());
             }
 
             $content = $model->callPush();
 
             if ($model->hasErrors() || empty($content)) {
-                return $response->getModelErrors($model->getEmptyModel(), $model->getErrors());
+                return $response->getModelErrors($model->getBodyModel(), $model->getErrors());
             }
 
             return $response->getSuccess($content);
         } catch(Exception $exception) {
+            return $response->getExceptionError($exception);
+        }
+    }
+
+    /**
+     * Endpoint for mass to calls push notifications
+     * @param LogRequest $request
+     * @return string
+     */
+    public function callMassPush(LogRequest $request): string
+    {
+        $response = new Response();
+
+        try {
+            $params = $request->getQueryParams();
+
+            $model = new Notification($params);
+
+            if ($model->hasErrors()) {
+                $response->code = Consts::ERROR_CLIENT_CODE;
+
+                return $response->getModelErrors($model->getBodyModel(), $model->getErrors());
+            }
+
+            return $response->getSuccess($model->getBodyModel());
+        } catch (Exception $exception) {
             return $response->getExceptionError($exception);
         }
     }

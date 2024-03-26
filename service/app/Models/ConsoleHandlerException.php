@@ -1,10 +1,7 @@
-<?php
-
-namespace App\Models;
+<?php namespace App\Models;
 
 use App\Traits\MigrationTableSchemaTrait;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
 
 /**
  * Class ConsoleHandlerException
@@ -15,10 +12,10 @@ use Illuminate\Database\Eloquent\Model;
  * @property int $id
  * @property string $nameProcedure
  * @property string $descriptionException
- * @property string $created_at
- * @property string $updated_at
+ * @property string $createdAt
+ * @property string $updatedAt
  */
-class ConsoleHandlerException extends Model
+class ConsoleHandlerException extends ModelApp
 {
     use MigrationTableSchemaTrait;
     use HasFactory;
@@ -29,7 +26,13 @@ class ConsoleHandlerException extends Model
     {
         parent::__construct($attributes);
 
-        $fullNameClass = get_called_class();
+        $fullNameClass = get_class($this);
         $this->table = $this->setScheme(class_basename($fullNameClass));
+    }
+
+    public function setCheckError(): void
+    {
+        $this->setError(get_called_class(), 'Неверно переданы параметры');
+        $this->setBodyModel($this);
     }
 }

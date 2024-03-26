@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Models\Responses;
 
 use App\Consts;
-use App\Exceptions\ExceptionHandler;
 use App\Models\ModelApp;
 use App\Models\Responses\DataResult;
 use Exception;
@@ -27,13 +26,9 @@ class Response
     /**
      * Resulting set data from model
      *
-//     * @var DataResult
-     * @var array
+     * @var DataResult
      */
     public DataResult $result;
-//    public array $response;
-
-    public string $typeResponse;
 
     /**
      * inner HTTP-code of application
@@ -60,6 +55,7 @@ class Response
                 $this->response = new DataResult((array)$data);
             }
             $this->code = Consts::SUCCESS_CODE;
+            $this->response->type = Consts::SUCCESS_TYPE;
 
             return json_encode($this, JSON_UNESCAPED_UNICODE);
         } catch (Exception $exception){
@@ -105,10 +101,11 @@ class Response
     {
         if (empty($messages)) {
             $message = new ModelApp();
-            $message->setError(Consts::ERROR_TYPE, "Ошибка запроса");
+            $message->setError(get_called_class(), "Ошибка запроса");
             $messages = $message->getErrors();
         }
         $this->response = new DataResult([$data], $messages);
+        $this->response->type = Consts::ERROR_TYPE;
     }
 
 
@@ -124,9 +121,10 @@ class Response
 
         $messages = new ModelApp();
 
-        $messages->setError(Consts::EXCEPTION_TYPE, $exception->getMessage());
+        $messages->setError($exception->getFile() . " on line: " . $exception->getLine(), $exception->getMessage());
 
         $this->response = new DataResult($exception->getTrace(), $messages->getErrors());
+        $this->response->type = Consts::EXCEPTION_TYPE;
         $this->code = ($code === 0) ? Consts::EXCEPTION_CODE : $code;
 
         return json_encode($this, JSON_UNESCAPED_UNICODE);

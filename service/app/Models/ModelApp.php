@@ -1,38 +1,56 @@
 <?php namespace App\Models;
 
 use App\Exceptions\ErrorHandler;
-use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 
 class ModelApp extends Model
 {
+    /**
+     * Array processed errors that may be called in model
+     * @var array
+     */
     private static array $errors = [];
 
-    private mixed $emptyModel = [];
+    /**
+     * Body of model that initialized when apply on endpoint.
+     * @var mixed|array
+     */
+    private mixed $bodyModel = [];
+
 
     /**
-     * ModelApp constructor.
+     * When apply on endpoint in construct initialized model.
      * @param mixed $model
      */
-    public function getEmptyModel()
+    protected function setBodyModel(mixed $model=[]): void
     {
-
-        return $this->emptyModel;
-//        if ($model instanceof Collection) {
-//            $this->response = new DataResult($model->all());
-//        } else if (gettype($model) === 'array') {
-//            $this->response = new DataResult($model);
-//        } else {
-//            $this->response = new DataResult((array)$model);
-//        }
+        if (isset($model->fillable)) {
+            $this->id = 0;
+            foreach ($model->fillable as $attribute) {
+                $this->bodyModel[$attribute] = null;
+            }
+        }
+        $this->bodyModel = [];
     }
 
-    protected function setEmptyModel(mixed $model=[]): void
+    /**
+     * Model that initialized when apply on endpoint.
+     * May be empty array or filled object with values - null
+     *
+     * @return array
+     */
+    public function getBodyModel(): array
     {
-        $this->emptyModel = $model;
+        return $this->bodyModel;
     }
 
 
+    /**
+     * When happens error in model, to called this function
+     *
+     * @param string $placeError
+     * @param string $textError
+     */
     public function setError(string $placeError, string $textError): void
     {
         $error = new ErrorHandler($placeError, $textError);
@@ -40,11 +58,21 @@ class ModelApp extends Model
         self::$errors = array_merge(self::$errors, [$error]);
     }
 
+    /**
+     * Get errors. Called function from controller.
+     *
+     * @return array
+     */
     public function getErrors(): array
     {
         return self::$errors;
     }
 
+    /**
+     * Check on exist errors in model
+     *
+     * @return bool
+     */
     public function hasErrors(): bool
     {
         return !empty(self::$errors);

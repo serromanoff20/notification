@@ -48,17 +48,17 @@ class Consts
 
 
     /**
-     *
+     * Type of resulting set data
      */
     public const SUCCESS_TYPE = "success";
 
     /**
-     *
+     * Type of resulting set data
      */
     public const ERROR_TYPE = "error";
 
     /**
-     *
+     * Type of resulting set data
      */
     public const EXCEPTION_TYPE = "exception";
 

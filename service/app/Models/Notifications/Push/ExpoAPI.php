@@ -1,10 +1,7 @@
-<?php namespace App\Models\Push;
+<?php namespace App\Models\Notifications\Push;
 
-use App\Consts;
 use App\Models\ModelApp;
-use App\Models\LogRequest;
 use Illuminate\Support\Facades\Http;
-use stdClass;
 
 /**
  * Class ExpoAPI
@@ -22,10 +19,28 @@ class ExpoAPI extends ModelApp
      */
     private const SEND_URL = "https://exp.host/--/api/v2/push/send";
 
-    private string $token;
+    /**
+     * Token or array tokens
+     * @var string|array
+     */
+    private string|array $token;
+
+    /**
+     * Title of message
+     * @var string
+     */
     private string $title_message;
+
+    /**
+     * Body of message
+     * @var string
+     */
     private string $body_message;
 
+    /**
+     * Model that returned. May self include empty array or data that returned by ExpoAPI.
+     * @var mixed
+     */
     public mixed $returnedModel = [];
 
     /**
@@ -46,7 +61,7 @@ class ExpoAPI extends ModelApp
             $this->body_message = $params['message'];
         } else {
             $this->setError(get_called_class(), 'Неверно переданы параметры');
-            $this->setEmptyModel($this->returnedModel);
+            $this->setBodyModel($this->returnedModel);
         }
     }
 

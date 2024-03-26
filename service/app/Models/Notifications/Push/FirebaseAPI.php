@@ -1,4 +1,4 @@
-<?php namespace App\Models\Push;
+<?php namespace App\Models\Notifications\Push;
 
 use App\Consts;
 use App\Models\ModelApp;
@@ -16,10 +16,28 @@ class FirebaseAPI extends ModelApp
      */
     public const VAPIDKEY = "BFNcEvhay0biTh325tNGaIHDyL0qquEjQ3cFc3qqq5X-RTn9dzoUqg5JJhxg1Y1VUzkP9KIUjGXh3jlivfObO30";
 
+    /**
+     * Token by which sends message
+     * @var string
+     */
     private string $token;
+
+    /**
+     * Title of message
+     * @var string
+     */
     private string $title_message;
+
+    /**
+     * Body of message
+     * @var string
+     */
     private string $body_message;
 
+    /**
+     * Model that returned. May self include empty array or data that returned by FirebaseAPI.
+     * @var mixed
+     */
     public mixed $returnedModel = [];
 
     /**
@@ -40,7 +58,7 @@ class FirebaseAPI extends ModelApp
             $this->body_message = $params['message'];
         } else {
             $this->setError(get_called_class(), 'Неверно переданы параметры');
-            $this->setEmptyModel($this->returnedModel);
+            $this->setBodyModel($this);
         }
     }
 
@@ -62,6 +80,10 @@ class FirebaseAPI extends ModelApp
         return $content;
     }
 
+    /**
+     * Function than call one push-notification.
+     * @return array
+     */
     public function callOnePush(): array
     {
         $headers = array(
